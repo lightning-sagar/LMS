@@ -133,31 +133,11 @@ export default function DiseaseDetection() {
                 />
               </div>
 
-              <div>
-                <label className="block font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                  Select Your Symptoms
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  {commonSymptoms.map((symptom) => (
-                    <div key={symptom} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={symptom}
-                        checked={symptoms.includes(symptom)}
-                        onChange={() => handleSymptomToggle(symptom)}
-                        className="w-4 h-4"
-                      />
-                      <label htmlFor={symptom} className="text-sm text-gray-700 dark:text-gray-300">
-                        {symptom}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            
 
               <div>
                 <label htmlFor="additional" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Additional Symptoms or Notes
+                   Symptoms or Notes
                 </label>
                 <textarea
                   id="additional"
