@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Leaf, Thermometer, Video, Menu, X } from 'lucide-react';
+import { Leaf, Thermometer, Video,Stethoscope, Menu, X } from 'lucide-react';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +10,7 @@ const Navigation = () => {
     { path: '/', label: 'Home', icon: Leaf },
     { path: '/temperature', label: 'Monitoring', icon: Thermometer },
     { path: '/feed', label: 'Live Feed', icon: Video },
+    { path: '/DiseaseDetection', label: 'Disease Detection', icon: Stethoscope },
   ];
 
   return (
