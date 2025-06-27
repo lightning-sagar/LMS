@@ -4,30 +4,12 @@ import { useState } from "react"
 import { AlertTriangle, Activity, Heart, Brain, Stethoscope, User, Thermometer, Construction } from "lucide-react"
 
 export default function DiseaseDetection() {
-  const [symptoms, setSymptoms] = useState<string[]>([])
+  const [symptoms, _] = useState<string[]>([])
   const [prediction, setPrediction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
-
-  const commonSymptoms = [
-    "Fever",
-    "Headache",
-    "Cough",
-    "Fatigue",
-    "Nausea",
-    "Dizziness",
-    "Chest Pain",
-    "Shortness of Breath",
-    "Abdominal Pain",
-    "Joint Pain",
-    "Skin Rash",
-    "Loss of Appetite",
-    "Weight Loss",
-    "Insomnia",
-  ]
-
-  const handleSymptomToggle = (symptom: string) => {
-    setSymptoms((prev) => (prev.includes(symptom) ? prev.filter((s) => s !== symptom) : [...prev, symptom]))
-  }
+  // const handleSymptomToggle = (symptom: string) => {
+  //   setSymptoms((prev) => (prev.includes(symptom) ? prev.filter((s) => s !== symptom) : [...prev, symptom]))
+  // }
 
   const handlePredict = () => {
     setIsLoading(true)
