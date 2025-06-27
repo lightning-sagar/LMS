@@ -18,7 +18,7 @@ const FeedPage = () => {
   const [controlStyle, setControlStyle] = useState<"text" | "arrows">("text")
 
   // Configuration - you can move these to environment variables
-  const CONTROL_API_URL = "https://your-ngrok-url.ngrok-free.app/" // Replace with your actual URL
+  const CONTROL_API_URL = "https://df0a-2409-40c4-31b-896b-b5b-64f-c55-55e6.ngrok-free.app/" // Replace with your actual URL
 
   const handleDirectionStart = (dir: string) => {
     setDirection(dir)

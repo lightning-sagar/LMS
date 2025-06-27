@@ -15,30 +15,30 @@ export const ControlPad = ({ onDirectionStart, onDirectionStop, currentDirection
       <div className="grid grid-cols-3 gap-2">
         {/* Top Row */}
         <div></div>
-        <DirectionButton direction="forward" onMouseEnter={onDirectionStart} onMouseLeave={onDirectionStop}>
+        <DirectionButton direction="f" onMouseEnter={onDirectionStart} onMouseLeave={onDirectionStop}>
           ↑ Forward
         </DirectionButton>
         <div></div>
 
         {/* Middle Row */}
-        <DirectionButton direction="left" onMouseEnter={onDirectionStart} onMouseLeave={onDirectionStop}>
+        <DirectionButton direction="a" onMouseEnter={onDirectionStart} onMouseLeave={onDirectionStop}>
           ← Left
         </DirectionButton>
         <DirectionButton
-          direction="stop"
+          direction="s"
           onMouseEnter={onDirectionStart}
           onMouseLeave={onDirectionStop}
           variant="danger"
         >
           ⏹ Stop
         </DirectionButton>
-        <DirectionButton direction="right" onMouseEnter={onDirectionStart} onMouseLeave={onDirectionStop}>
+        <DirectionButton direction="c" onMouseEnter={onDirectionStart} onMouseLeave={onDirectionStop}>
           → Right
         </DirectionButton>
 
         {/* Bottom Row */}
         <div></div>
-        <DirectionButton direction="backward" onMouseEnter={onDirectionStart} onMouseLeave={onDirectionStop}>
+        <DirectionButton direction="b" onMouseEnter={onDirectionStart} onMouseLeave={onDirectionStop}>
           ↓ Backward
         </DirectionButton>
         <div></div>
