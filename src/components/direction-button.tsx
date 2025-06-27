@@ -4,8 +4,7 @@ import type { ReactNode } from "react"
 
 interface DirectionButtonProps {
   direction: string
-  onMouseEnter: (direction: string) => void
-  onMouseLeave: () => void
+  onClick: (direction: string) => void
   children: ReactNode
   variant?: "primary" | "danger"
   className?: string
@@ -13,8 +12,7 @@ interface DirectionButtonProps {
 
 export const DirectionButton = ({
   direction,
-  onMouseEnter,
-  onMouseLeave,
+  onClick,
   children,
   variant = "primary",
   className = "",
@@ -27,8 +25,7 @@ export const DirectionButton = ({
 
   return (
     <button
-      onMouseEnter={() => onMouseEnter(direction)}
-      onMouseLeave={onMouseLeave}
+      onClick={() => onClick(direction)}
       className={`${baseClasses} ${variantClasses[variant]} ${className}`}
     >
       {children}

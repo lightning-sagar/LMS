@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useRef, useState } from "react"
 import { Video, Wifi, WifiOff, Activity, AlertCircle } from "lucide-react"
 import { ControlPad } from "../components/control-pad"
@@ -17,41 +15,29 @@ const FeedPage = () => {
   const [frameCount, setFrameCount] = useState(0)
   const [controlStyle, setControlStyle] = useState<"text" | "arrows">("text")
 
-  // Configuration - you can move these to environment variables
-  const CONTROL_API_URL = "https://df0a-2409-40c4-31b-896b-b5b-64f-c55-55e6.ngrok-free.app/" // Replace with your actual URL
+  const CONTROL_API_URL = "https://a6c9-2409-40c4-31b-896b-b5b-64f-c55-55e6.ngrok-free.app/" 
 
-  const handleDirectionStart = (dir: string) => {
+  const handleDirectionStart = async (dir: string) => {
     setDirection(dir)
-    intervalRef.current = setInterval(async () => {
-      console.log("Sending direction:", dir)
-      try {
-        const res = await fetch(CONTROL_API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true",
-          },
-          body: JSON.stringify({ direction: dir }),
-        })
+    try {
+      const res = await fetch(CONTROL_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+        body: JSON.stringify({ direction: dir }),
+      })
 
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`)
-        }
-
-        const data = await res.json()
-        console.log("Control response:", data)
-      } catch (error) {
-        console.error("Error sending control command:", error)
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`)
       }
-    }, 500)
-  }
 
-  const handleDirectionStop = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
+      const data = await res.json()
+      console.log("Control response:", data)
+    } catch (error) {
+      console.error("Error sending control command:", error)
     }
-    setDirection("")
   }
 
   useEffect(() => {
@@ -170,11 +156,10 @@ const FeedPage = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Live Feed Monitoring</h1>
           <div className="flex items-center space-x-4">
             <div
-              className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                isConnected
+              className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${isConnected
                   ? "bg-green-100 text-green-700 border border-green-200"
                   : "bg-red-100 text-red-700 border border-red-200"
-              }`}
+                }`}
             >
               {isConnected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
               <span>WebSocket: {wsStatus}</span>
@@ -202,21 +187,19 @@ const FeedPage = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setControlStyle("text")}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                    controlStyle === "text"
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${controlStyle === "text"
                       ? "bg-blue-100 text-blue-700"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   Text
                 </button>
                 <button
                   onClick={() => setControlStyle("arrows")}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                    controlStyle === "arrows"
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${controlStyle === "arrows"
                       ? "bg-blue-100 text-blue-700"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   Arrows
                 </button>
@@ -232,11 +215,10 @@ const FeedPage = () => {
               />
               <div className="absolute top-4 left-4">
                 <div
-                  className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium ${
-                    isConnected
+                  className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium ${isConnected
                       ? "bg-green-500/20 text-green-300 border border-green-500/30"
                       : "bg-red-500/20 text-red-300 border border-red-500/30"
-                  }`}
+                    }`}
                 >
                   <div
                     className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"} ${isConnected ? "animate-pulse" : ""}`}
@@ -260,13 +242,11 @@ const FeedPage = () => {
             {controlStyle === "text" ? (
               <ControlPad
                 onDirectionStart={handleDirectionStart}
-                onDirectionStop={handleDirectionStop}
                 currentDirection={direction}
               />
             ) : (
               <ArrowControlPad
                 onDirectionStart={handleDirectionStart}
-                onDirectionStop={handleDirectionStop}
                 currentDirection={direction}
               />
             )}
