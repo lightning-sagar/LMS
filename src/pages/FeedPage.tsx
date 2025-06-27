@@ -15,7 +15,7 @@ const FeedPage = () => {
   const [frameCount, setFrameCount] = useState(0)
   const [controlStyle, setControlStyle] = useState<"text" | "arrows">("text")
 
-  const CONTROL_API_URL = "https://f3bb-2409-40c4-43-820a-cdc1-c0ee-4cd9-6b10.ngrok-free.app/"
+  const CONTROL_API_URL = "https://8ecd-2409-40c4-43-820a-cdc1-c0ee-4cd9-6b10.ngrok-free.app/"
 
   const handleDirectionStart = async (dir: string) => {
     setDirection(dir)
