@@ -26,7 +26,7 @@ const FeedPage = () => {
   const [frameCount, setFrameCount] = useState(0)
   const [controlStyle, setControlStyle] = useState<"text" | "arrows">("text")
 
-  const CONTROL_API_URL = "https://8ecd-2409-40c4-43-820a-cdc1-c0ee-4cd9-6b10.ngrok-free.app/"
+  const CONTROL_API_URL = "https://2124-2409-40c4-43-820a-cdc1-c0ee-4cd9-6b10.ngrok-free.app/"
   const ROBOFLOW_API_KEY = "iWTbz1A2Zwcd6yJNw8F3"
   const ROBOFLOW_API_URL = "https://serverless.roboflow.com/person-detection-9a6mk/16"
 
@@ -59,7 +59,7 @@ const FeedPage = () => {
     const resultCtx = resultCanvas.getContext("2d")
     if (!liveCtx || !resultCtx) return
 
-    const liveSocket = new WebSocket("wss://98e5-2409-40c4-43-820a-5394-304d-cafb-c0df.ngrok-free.app/share")
+    const liveSocket = new WebSocket("wss://1423-2409-40c4-43-820a-5394-304d-cafb-c0df.ngrok-free.app/share")as any;
     liveSocket.binaryType = "arraybuffer"
     let liveBuffer = new Uint8Array(0)
     let frameIndex = 0
@@ -69,7 +69,7 @@ const FeedPage = () => {
       setIsConnected(true)
     }
 
-    liveSocket.onmessage = (event) => {
+    liveSocket.onmessage = (event:any) => {
       const newData = new Uint8Array(event.data)
       liveBuffer = new Uint8Array([...liveBuffer, ...newData])
 
@@ -113,7 +113,7 @@ const FeedPage = () => {
               })
 
               const predictions = response.data.predictions as Prediction[]
-              setDetectionStatus(`${predictions.length} personas detected`)
+              setDetectionStatus(`${predictions.length} persons detected`)
 
               resultCtx.drawImage(img, 0, 0)
               resultCtx.strokeStyle = "lime"
