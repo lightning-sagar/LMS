@@ -59,7 +59,7 @@ const FeedPage = () => {
     const resultCtx = resultCanvas.getContext("2d")
     if (!liveCtx || !resultCtx) return
 
-    const liveSocket = new WebSocket("wss://8504-2409-40c4-3003-6795-5608-4900-c146-a753.ngrok-free.app/share")as any;
+    const liveSocket = new WebSocket("wss://1c50-2409-40c4-3003-6795-5608-4900-c146-a753.ngrok-free.app/share")as any;
     liveSocket.binaryType = "arraybuffer"
     let liveBuffer = new Uint8Array(0)
     let frameIndex = 0
