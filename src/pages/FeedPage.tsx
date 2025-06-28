@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { Video, Wifi, WifiOff, Activity, AlertCircle } from "lucide-react"
 import { ControlPad } from "../components/control-pad"
 import { ArrowControlPad } from "../components/Arrow-controller-pad"
+import axios from "axios"
 
 const FeedPage = () => {
   const liveCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -16,6 +17,8 @@ const FeedPage = () => {
   const [controlStyle, setControlStyle] = useState<"text" | "arrows">("text")
 
   const CONTROL_API_URL = "https://8ecd-2409-40c4-43-820a-cdc1-c0ee-4cd9-6b10.ngrok-free.app/"
+  const ROBOFLOW_API_KEY = "iWTbz1A2Zwcd6yJNw8F3"
+  const ROBOFLOW_API_URL = "https://serverless.roboflow.com/person-detection-9a6mk/16"
 
   const handleDirectionStart = async (dir: string) => {
     setDirection(dir)
@@ -29,10 +32,7 @@ const FeedPage = () => {
         body: JSON.stringify({ direction: dir }),
       })
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
-      }
-
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
       const data = await res.json()
       console.log("Control response:", data)
     } catch (error) {
@@ -49,23 +49,14 @@ const FeedPage = () => {
     const resultCtx = resultCanvas.getContext("2d")
     if (!liveCtx || !resultCtx) return
 
-    // --- ORIGINAL CAMERA FEED
-    const liveSocket = new WebSocket("ws://localhost:8000/share")
+    const liveSocket = new WebSocket("wss://98e5-2409-40c4-43-820a-5394-304d-cafb-c0df.ngrok-free.app/share")
     liveSocket.binaryType = "arraybuffer"
     let liveBuffer = new Uint8Array(0)
-
-    // --- AI DETECTION FEED
-    const aiSocket = new WebSocket("ws://localhost:8080/ws")
-    aiSocket.binaryType = "arraybuffer"
-    let aiBuffer = new Uint8Array(0)
+    let frameIndex = 0
 
     liveSocket.onopen = () => {
       setWsStatus("Connected to Camera")
       setIsConnected(true)
-    }
-
-    aiSocket.onopen = () => {
-      setDetectionStatus("Connected to AI Detection Service")
     }
 
     liveSocket.onmessage = (event) => {
@@ -85,44 +76,57 @@ const FeedPage = () => {
           const img = new Image()
           img.src = url
 
-          img.onload = () => {
+          img.onload = async () => {
             liveCanvas.width = img.width
             liveCanvas.height = img.height
-            liveCtx.drawImage(img, 0, 0)
-            URL.revokeObjectURL(url)
-          }
-
-          // Send raw frame to AI WebSocket
-          if (aiSocket.readyState === WebSocket.OPEN) {
-            aiSocket.send(frameData)
-          }
-        } else break
-      }
-    }
-
-    aiSocket.onmessage = (event) => {
-      const newData = new Uint8Array(event.data)
-      aiBuffer = new Uint8Array([...aiBuffer, ...newData])
-
-      while (aiBuffer.length >= 8) {
-        const sizeData = new DataView(aiBuffer.buffer, 0, 8)
-        const frameSize = Number(sizeData.getBigUint64(0, true))
-
-        if (aiBuffer.length >= 8 + frameSize) {
-          const frameData = aiBuffer.slice(8, 8 + frameSize)
-          aiBuffer = aiBuffer.slice(8 + frameSize)
-
-          const blob = new Blob([frameData], { type: "image/jpeg" })
-          const url = URL.createObjectURL(blob)
-          const img = new Image()
-          img.src = url
-
-          img.onload = () => {
             resultCanvas.width = img.width
             resultCanvas.height = img.height
+
+            liveCtx.drawImage(img, 0, 0)
             resultCtx.drawImage(img, 0, 0)
-            setFrameCount((prev) => prev + 1)
+
             URL.revokeObjectURL(url)
+            setFrameCount(prev => prev + 1)
+
+            // Throttle AI inference to every 10 frames
+            frameIndex++
+            if (frameIndex % 10 !== 0) return
+
+            try {
+              const frameBase64 = liveCanvas.toDataURL("image/jpeg").split(",")[1]
+
+              const response = await axios({
+                method: "POST",
+                url: ROBOFLOW_API_URL,
+                params: {
+                  api_key: ROBOFLOW_API_KEY,
+                },
+                data: frameBase64,
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded"
+                }
+              })
+
+              const predictions = response.data.predictions
+              setDetectionStatus(`${predictions.length} personas detected`)
+
+              // Redraw original frame
+              resultCtx.drawImage(img, 0, 0)
+              resultCtx.strokeStyle = "lime"
+              resultCtx.lineWidth = 2
+              resultCtx.font = "14px Arial"
+              resultCtx.fillStyle = "lime"
+
+              predictions.forEach(pred => {
+                const { x, y, width, height, confidence } = pred
+                resultCtx.strokeRect(x - width / 2, y - height / 2, width, height)
+                resultCtx.fillText(`${(confidence * 100).toFixed(1)}%`, x - width / 2, y - height / 2 - 5)
+              })
+
+            } catch (error) {
+              console.error("Detection error:", error.message)
+              setDetectionStatus("Detection failed")
+            }
           }
         } else break
       }
@@ -133,17 +137,13 @@ const FeedPage = () => {
       setWsStatus("Disconnected from Camera")
     }
 
-    aiSocket.onerror = () => {
-      setDetectionStatus("Error connecting to AI Detection")
-    }
-
-    aiSocket.onclose = () => {
-      setDetectionStatus("AI Detection Disconnected")
+    liveSocket.onerror = () => {
+      setIsConnected(false)
+      setWsStatus("Error connecting to Camera")
     }
 
     return () => {
       liveSocket.close()
-      aiSocket.close()
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [])
@@ -151,16 +151,13 @@ const FeedPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pt-8 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Live Feed Monitoring</h1>
           <div className="flex items-center space-x-4">
-            <div
-              className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${isConnected
-                  ? "bg-green-100 text-green-700 border border-green-200"
-                  : "bg-red-100 text-red-700 border border-red-200"
-                }`}
-            >
+            <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${isConnected
+              ? "bg-green-100 text-green-700 border border-green-200"
+              : "bg-red-100 text-red-700 border border-red-200"
+              }`}>
               {isConnected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
               <span>WebSocket: {wsStatus}</span>
             </div>
@@ -171,9 +168,7 @@ const FeedPage = () => {
           </div>
         </div>
 
-        {/* Video Feed Section */}
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Live Camera Feed */}
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-200">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
@@ -182,14 +177,12 @@ const FeedPage = () => {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900">📹 Live Camera Feed</h3>
               </div>
-
-              {/* Control Style Toggle */}
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setControlStyle("text")}
                   className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${controlStyle === "text"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   Text
@@ -197,8 +190,8 @@ const FeedPage = () => {
                 <button
                   onClick={() => setControlStyle("arrows")}
                   className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${controlStyle === "arrows"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   Arrows
@@ -207,22 +200,13 @@ const FeedPage = () => {
             </div>
 
             <div className="relative">
-              <canvas
-                ref={liveCanvasRef}
-                width="640"
-                height="480"
-                className="w-full h-auto bg-gray-900 rounded-lg border-2 border-gray-200"
-              />
+              <canvas ref={liveCanvasRef} width="640" height="480" className="w-full h-auto bg-gray-900 rounded-lg border-2 border-gray-200" />
               <div className="absolute top-4 left-4">
-                <div
-                  className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium ${isConnected
-                      ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                      : "bg-red-500/20 text-red-300 border border-red-500/30"
-                    }`}
-                >
-                  <div
-                    className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"} ${isConnected ? "animate-pulse" : ""}`}
-                  ></div>
+                <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium ${isConnected
+                  ? "bg-green-500/20 text-green-300 border border-green-500/30"
+                  : "bg-red-500/20 text-red-300 border border-red-500/30"
+                  }`}>
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-400 animate-pulse" : "bg-red-400"}`}></div>
                   <span>{isConnected ? "LIVE" : "OFFLINE"}</span>
                 </div>
               </div>
@@ -238,21 +222,13 @@ const FeedPage = () => {
               </div>
             </div>
 
-            {/* Dynamic Control Components */}
             {controlStyle === "text" ? (
-              <ControlPad
-                onDirectionStart={handleDirectionStart}
-                currentDirection={direction}
-              />
+              <ControlPad onDirectionStart={handleDirectionStart} currentDirection={direction} />
             ) : (
-              <ArrowControlPad
-                onDirectionStart={handleDirectionStart}
-                currentDirection={direction}
-              />
+              <ArrowControlPad onDirectionStart={handleDirectionStart} currentDirection={direction} />
             )}
           </div>
 
-          {/* Detection Results */}
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-200">
             <div className="flex items-center space-x-3 mb-6">
               <div className="bg-emerald-100 p-2 rounded-lg">
@@ -262,12 +238,7 @@ const FeedPage = () => {
             </div>
 
             <div className="relative">
-              <canvas
-                ref={resultCanvasRef}
-                width="640"
-                height="480"
-                className="w-full h-auto bg-gray-900 rounded-lg border-2 border-gray-200"
-              />
+              <canvas ref={resultCanvasRef} width="640" height="480" className="w-full h-auto bg-gray-900 rounded-lg border-2 border-gray-200" />
               <div className="absolute top-4 left-4">
                 <div className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-medium">
                   <div className="flex items-center space-x-2">
