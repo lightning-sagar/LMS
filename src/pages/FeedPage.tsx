@@ -3,6 +3,16 @@ import { Video, Wifi, WifiOff, Activity, AlertCircle } from "lucide-react"
 import { ControlPad } from "../components/control-pad"
 import { ArrowControlPad } from "../components/Arrow-controller-pad"
 import axios from "axios"
+interface Prediction {
+  x: number
+  y: number
+  width: number
+  height: number
+  confidence: number
+  class: string
+  class_id: number
+  detection_id: string
+}
 
 const FeedPage = () => {
   const liveCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -88,7 +98,6 @@ const FeedPage = () => {
             URL.revokeObjectURL(url)
             setFrameCount(prev => prev + 1)
 
-            // Throttle AI inference to every 10 frames
             frameIndex++
             if (frameIndex % 10 !== 0) return
 
@@ -98,33 +107,28 @@ const FeedPage = () => {
               const response = await axios({
                 method: "POST",
                 url: ROBOFLOW_API_URL,
-                params: {
-                  api_key: ROBOFLOW_API_KEY,
-                },
+                params: { api_key: ROBOFLOW_API_KEY },
                 data: frameBase64,
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded"
-                }
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
               })
 
-              const predictions = response.data.predictions
+              const predictions = response.data.predictions as Prediction[]
               setDetectionStatus(`${predictions.length} personas detected`)
 
-              // Redraw original frame
               resultCtx.drawImage(img, 0, 0)
               resultCtx.strokeStyle = "lime"
               resultCtx.lineWidth = 2
               resultCtx.font = "14px Arial"
               resultCtx.fillStyle = "lime"
 
-              predictions.forEach(pred => {
+              predictions.forEach((pred) => {
                 const { x, y, width, height, confidence } = pred
                 resultCtx.strokeRect(x - width / 2, y - height / 2, width, height)
                 resultCtx.fillText(`${(confidence * 100).toFixed(1)}%`, x - width / 2, y - height / 2 - 5)
               })
-
-            } catch (error) {
-              console.error("Detection error:", error.message)
+            } catch (error: unknown) {
+              const err = error as Error
+              console.error("Detection error:", err.message)
               setDetectionStatus("Detection failed")
             }
           }
