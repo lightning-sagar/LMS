@@ -32,7 +32,7 @@ const TemperaturePage = () => {
   const fetchData = async () => {
     try {
       const res = await fetch(
-        'https://3b79-2409-40c4-30-4716-5314-8cd9-c94d-78ce.ngrok-free.app/sensor',
+        'https://8504-2409-40c4-3003-6795-5608-4900-c146-a753.ngrok-free.app/sensor',
         {
           headers: {
             'ngrok-skip-browser-warning': 'true'

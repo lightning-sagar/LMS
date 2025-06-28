@@ -26,7 +26,7 @@ const FeedPage = () => {
   const [frameCount, setFrameCount] = useState(0)
   const [controlStyle, setControlStyle] = useState<"text" | "arrows">("text")
 
-  const CONTROL_API_URL = "https://2124-2409-40c4-43-820a-cdc1-c0ee-4cd9-6b10.ngrok-free.app/"
+  const CONTROL_API_URL = "https://4333-2409-40c4-3003-6795-e1a6-bf2e-19b3-2b23.ngrok-free.app/"
   const ROBOFLOW_API_KEY = "iWTbz1A2Zwcd6yJNw8F3"
   const ROBOFLOW_API_URL = "https://serverless.roboflow.com/person-detection-9a6mk/16"
 
@@ -59,7 +59,7 @@ const FeedPage = () => {
     const resultCtx = resultCanvas.getContext("2d")
     if (!liveCtx || !resultCtx) return
 
-    const liveSocket = new WebSocket("wss://3b79-2409-40c4-30-4716-5314-8cd9-c94d-78ce.ngrok-free.app/share")as any;
+    const liveSocket = new WebSocket("wss://8504-2409-40c4-3003-6795-5608-4900-c146-a753.ngrok-free.app/share")as any;
     liveSocket.binaryType = "arraybuffer"
     let liveBuffer = new Uint8Array(0)
     let frameIndex = 0
