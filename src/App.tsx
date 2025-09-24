@@ -3,7 +3,7 @@ import Navigation from './components/Navigation.tsx';
 import LandingPage from './pages/LandingPage';
 import TemperaturePage from './pages/TemperaturePage.tsx';
 import FeedPage from './pages/FeedPage';
-import DiseaseDetection from './pages/DecieseDetection.tsx';
+import CattleDiseaseDetection from './pages/DecieseDetection.tsx';
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
         <Navigation />
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/DiseaseDetection" element={<DiseaseDetection />} />
+          <Route path="/DiseaseDetection" element={<CattleDiseaseDetection />} />
           <Route path="/temperature" element={<TemperaturePage />} />
           <Route path="/feed" element={<FeedPage />} />
         </Routes>

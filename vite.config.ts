@@ -3,5 +3,11 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [
     tailwindcss(),
+    
   ],
+  server:{
+    proxy:{
+      '/api':'https://cattle-disease-prediction.onrender.com'
+    }
+  }
 })
