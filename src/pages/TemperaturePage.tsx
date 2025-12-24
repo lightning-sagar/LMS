@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   XAxis,
   YAxis,
@@ -6,16 +6,16 @@ import {
   Tooltip,
   ResponsiveContainer,
   Area,
-  AreaChart
-} from 'recharts';
+  AreaChart,
+} from "recharts";
 import {
   Thermometer,
   Droplets,
   AlertCircle,
   CheckCircle,
   TrendingUp,
-  Gauge
-} from 'lucide-react';
+  Gauge,
+} from "lucide-react";
 
 interface SensorData {
   temp: number;
@@ -30,9 +30,10 @@ const TemperaturePage = () => {
   const [isConnected, setIsConnected] = useState(false);
 
   const fetchData = async () => {
+    console.log("Fetching sensor data...");
     try {
       const res = await fetch(
-        'https://undeputized-quinton-monistically.ngrok-free.app/sensor',
+        'https://b83cfae63877.ngrok-free.app/sensor',
         {
           headers: {
             'ngrok-skip-browser-warning': 'true'
@@ -50,25 +51,25 @@ const TemperaturePage = () => {
         temp: sensor.temperature,
         humidity: sensor.humidity,
         pressure: sensor.pressure,
-        timestamp: new Date().toLocaleTimeString()
+        timestamp: new Date().toLocaleTimeString(),
       };
 
       setCurrentData(newDataPoint);
-      setData(prev => {
+      setData((prev) => {
         const updated = [...prev, newDataPoint].slice(-20);
-        localStorage.setItem('sensorData', JSON.stringify(updated));
+        localStorage.setItem("sensorData", JSON.stringify(updated));
         return updated;
       });
 
       setIsConnected(true);
     } catch (error) {
-      console.error('Error fetching sensor data:', error);
+      console.error("Error fetching sensor data:", error);
       setIsConnected(false);
     }
   };
 
   useEffect(() => {
-    const savedData = localStorage.getItem('sensorData');
+    const savedData = localStorage.getItem("sensorData");
     if (savedData) {
       const parsed: SensorData[] = JSON.parse(savedData);
       setData(parsed);
@@ -80,30 +81,42 @@ const TemperaturePage = () => {
   }, []);
 
   const getTemperatureStatus = (temp: number) => {
-    if (temp < 18) return { status: 'low', color: 'text-blue-600', bg: 'bg-blue-100' };
-    if (temp > 28) return { status: 'high', color: 'text-red-600', bg: 'bg-red-100' };
-    return { status: 'normal', color: 'text-green-600', bg: 'bg-green-100' };
+    if (temp < 18)
+      return { status: "low", color: "text-blue-600", bg: "bg-blue-100" };
+    if (temp > 28)
+      return { status: "high", color: "text-red-600", bg: "bg-red-100" };
+    return { status: "normal", color: "text-green-600", bg: "bg-green-100" };
   };
 
   const getHumidityStatus = (humidity: number) => {
-    if (humidity < 30) return { status: 'low', color: 'text-orange-600', bg: 'bg-orange-100' };
-    if (humidity > 70) return { status: 'high', color: 'text-blue-600', bg: 'bg-blue-100' };
-    return { status: 'normal', color: 'text-green-600', bg: 'bg-green-100' };
+    if (humidity < 30)
+      return { status: "low", color: "text-orange-600", bg: "bg-orange-100" };
+    if (humidity > 70)
+      return { status: "high", color: "text-blue-600", bg: "bg-blue-100" };
+    return { status: "normal", color: "text-green-600", bg: "bg-green-100" };
   };
 
-  const tempStatus = currentData ? getTemperatureStatus(currentData.temp) : null;
-  const humidityStatus = currentData ? getHumidityStatus(currentData.humidity) : null;
+  const tempStatus = currentData
+    ? getTemperatureStatus(currentData.temp)
+    : null;
+  const humidityStatus = currentData
+    ? getHumidityStatus(currentData.humidity)
+    : null;
 
   return (
     <div className="min-h-screen pt-8 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Environmental Monitoring</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Environmental Monitoring
+          </h1>
           <div className="flex items-center space-x-4">
             <div
               className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
-                isConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                isConnected
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
               }`}
             >
               {isConnected ? (
@@ -111,10 +124,10 @@ const TemperaturePage = () => {
               ) : (
                 <AlertCircle className="h-4 w-4" />
               )}
-              <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+              <span>{isConnected ? "Connected" : "Disconnected"}</span>
             </div>
             <span className="text-gray-500">
-              Last updated: {currentData?.timestamp || 'Never'}
+              Last updated: {currentData?.timestamp || "Never"}
             </span>
           </div>
         </div>
@@ -129,18 +142,22 @@ const TemperaturePage = () => {
                   <Thermometer className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Temperature</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Temperature
+                  </h3>
                   <p className="text-sm text-gray-500">Current reading</p>
                 </div>
               </div>
               {tempStatus && (
-                <div className={`px-3 py-1 rounded-full text-sm font-medium ${tempStatus.bg} ${tempStatus.color}`}>
+                <div
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${tempStatus.bg} ${tempStatus.color}`}
+                >
                   {tempStatus.status}
                 </div>
               )}
             </div>
             <div className="text-4xl font-bold text-gray-900 mb-2">
-              {currentData ? `${currentData.temp}°C` : '--'}
+              {currentData ? `${currentData.temp}°C` : "--"}
             </div>
             <p className="text-gray-600">Optimal range: 18-28°C</p>
           </div>
@@ -153,18 +170,22 @@ const TemperaturePage = () => {
                   <Droplets className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Humidity</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Humidity
+                  </h3>
                   <p className="text-sm text-gray-500">Current reading</p>
                 </div>
               </div>
               {humidityStatus && (
-                <div className={`px-3 py-1 rounded-full text-sm font-medium ${humidityStatus.bg} ${humidityStatus.color}`}>
+                <div
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${humidityStatus.bg} ${humidityStatus.color}`}
+                >
                   {humidityStatus.status}
                 </div>
               )}
             </div>
             <div className="text-4xl font-bold text-gray-900 mb-2">
-              {currentData ? `${currentData.humidity}%` : '--'}
+              {currentData ? `${currentData.humidity}%` : "--"}
             </div>
             <p className="text-gray-600">Optimal range: 30-70%</p>
           </div>
@@ -177,13 +198,15 @@ const TemperaturePage = () => {
                   <Gauge className="h-6 w-6 text-yellow-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Pressure</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Pressure
+                  </h3>
                   <p className="text-sm text-gray-500">Current reading</p>
                 </div>
               </div>
             </div>
             <div className="text-4xl font-bold text-gray-900 mb-2">
-              {currentData ? `${currentData.pressure} hPa` : '--'}
+              {currentData ? `${currentData.pressure} hPa` : "--"}
             </div>
             <p className="text-gray-600">Typical range: 980–1050 hPa</p>
           </div>
@@ -240,7 +263,7 @@ const ChartCard = ({
   gradientId,
   dataKey,
   unit,
-  data
+  data,
 }: {
   title: string;
   iconColor: string;
@@ -263,20 +286,23 @@ const ChartCard = ({
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
-  dataKey="timestamp"
-  stroke="#666"
-  fontSize={12}
-  tickFormatter={() => ''}
-/>
+            dataKey="timestamp"
+            stroke="#666"
+            fontSize={12}
+            tickFormatter={() => ""}
+          />
           <YAxis stroke="#666" fontSize={12} />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
             }}
-            formatter={(value: number) => [`${value} ${unit}`, title.split(' ')[0]]}
+            formatter={(value: number) => [
+              `${value} ${unit}`,
+              title.split(" ")[0],
+            ]}
           />
           <Area
             type="monotone"
